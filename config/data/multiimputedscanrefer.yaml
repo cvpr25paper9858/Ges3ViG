@@ -9,9 +9,9 @@ lang_dataset_path: ${data.data_root_path}/pointrefer
 
 lang_metadata:
   metadata_root_path: ${data.lang_dataset_path}/metadata
-  train_language_data: ${data.lang_metadata.metadata_root_path}/PointRefer_filtered_train_final_k.json
-  val_language_data: ${data.lang_metadata.metadata_root_path}/PointRefer_filtered_val_final_k.json
-  test_language_data: ${data.lang_metadata.metadata_root_path}/ScanRefer_filtered_test.json
+  train_language_data: ${data.lang_metadata.metadata_root_path}/ImputeRefer_filtered_train.json
+  val_language_data: ${data.lang_metadata.metadata_root_path}/ImputeRefer_filtered_test.json
+  test_language_data: ${data.lang_metadata.metadata_root_path}/ImputeRefer_filtered_test.json
 
 chunk_size: 1
 
