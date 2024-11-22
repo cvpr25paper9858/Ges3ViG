@@ -1,21 +1,15 @@
-# M3DRef-CLIP
+# Ges3ViG
 
 <a href="https://pytorch.org/"><img alt="PyTorch" src="https://img.shields.io/badge/PyTorch-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white"></a>
 <a href="https://pytorchlightning.ai/"><img alt="Lightning" src="https://img.shields.io/badge/Lightning-792DE4?style=for-the-badge&logo=pytorch-lightning&logoColor=white"></a>
 <a href="https://wandb.ai/site"><img alt="WandB" src="https://img.shields.io/badge/Weights_&_Biases-FFBE00?style=for-the-badge&logo=WeightsAndBiases&logoColor=white"></a>
 
-This is the official implementation for [Multi3DRefer: Grounding Text Description to Multiple 3D Objects](https://3dlg-hcvc.github.io/multi3drefer/).
+This is the official implementation for **Ges3ViG: Incorporating Pointing Gestures into Language-Based 3D Visual Grounding for Embodied Reference Understanding.**
 
-![Model Architecture](./docs/img/model_arch.jpg)
+![Model Architecture](./docs/img/model_arch.png)
 
 ## Requirement
 This repo contains [CUDA](https://developer.nvidia.com/cuda-zone) implementation, please make sure your [GPU compute capability](https://developer.nvidia.com/cuda-gpus) is at least 3.0 or above.
-
-We report the max computing resources usage with batch size 4:
-
-|               | Training | Inference |
-|:--------------|:---------|:----------|
-| GPU mem usage | 15.2 GB  | 11.3 GB   |
 
 
 ## Setup
@@ -24,8 +18,8 @@ We recommend the use of [miniconda](https://docs.conda.io/en/latest/miniconda.ht
 
 ```shell
 # create and activate the conda environment
-conda create -n m3drefclip python=3.10
-conda activate m3drefclip
+conda create -n ges3vig python=3.10
+conda activate ges3vig
 
 # install PyTorch 2.0.1
 conda install pytorch torchvision pytorch-cuda=11.7 -c pytorch -c nvidia
@@ -43,7 +37,7 @@ pip install -U git+https://github.com/NVIDIA/MinkowskiEngine -v --no-deps \
 pip install .
 
 # install CUDA extensions
-cd m3drefclip/common_ops
+cd ges3vig/common_ops
 pip install .
 ```
 
@@ -67,18 +61,18 @@ pip install MinkowskiEngine
 pip install .
 
 # install CUDA extensions
-cd m3drefclip/common_ops
+cd ges3vig/common_ops
 pip install .
 ```
 
 ## Data Preparation
-Note: Both [ScanRefer](https://daveredrum.github.io/ScanRefer/) and [Nr3D](https://referit3d.github.io/) datasets requires the [ScanNet v2](http://www.scan-net.org/) dataset. Please preprocess it first.
+Note: ImputeRefer dataset requires the [ScanNet v2](http://www.scan-net.org/) dataset. Please preprocess it first.
 
 
-### Preprocessed ScanNet v2 and Preprocessed Imputed Scannet v2
+<!-- ### Preprocessed ScanNet v2 and Preprocessed Imputed Scannet v2
 1. Download the [Preprocessed Imputed ScanNet v2 dataset (train/val)](https://drive.google.com/drive/u/2/folders/15FKrxOVmSFk9hxlMDFHx-bf0VoVzTgNl), and [Preprocessed ScanNet original train-set](https://drive.google.com/file/d/114y3GHtD8M-1DoYn3RD8PxLldBpbYiIl/view?usp=drive_link). The raw dataset files should be organized as follows:
     ```shell
-    m3drefclip # project root
+    ges3vig # project root
     ├── dataset
     │   ├── scannetv2
     │   │   ├── train.zip
@@ -95,11 +89,11 @@ Note: Both [ScanRefer](https://daveredrum.github.io/ScanRefer/) and [Nr3D](https
     unzip *.zip
     ```
     Here train, test, val.zip contain preprocessed .pth files for original ScanNet-V2 dataset while train_imputed_newer, val_imputed_newer.zip contain modified .pth for imputed version of ScanNet-V2. 
-    The file points.zip contains the bounding box-corner coordinates for every object per scene and some additional meta-data and file translated_transforms_v2.zip contains .pth files containing translation and rotation data for the singular human subject we have given by imputer.
+    The file points.zip contains the bounding box-corner coordinates for every object per scene and some additional meta-data and file translated_transforms_v2.zip contains .pth files containing translation and rotation data for the singular human subject we have given by imputer. -->
 ### ScanNet v2 dataset
 1. Download the [ScanNet v2 dataset (train/val/test)](http://www.scan-net.org/), (refer to [ScanNet's instruction](dataset/scannetv2/README.md) for more details). The raw dataset files should be organized as follows:
     ```shell
-    m3drefclip # project root
+    ges3vig # project root
     ├── dataset
     │   ├── scannetv2
     │   │   ├── scans
@@ -115,60 +109,79 @@ Note: Both [ScanRefer](https://daveredrum.github.io/ScanRefer/) and [Nr3D](https
     python dataset/scannetv2/preprocess_all_data.py data=scannetv2 +workers={cpu_count}
     ```
 
-3. Pre-process the multiview features from ENet: Please refer to the instructions in [ScanRefer's repo](https://github.com/daveredrum/ScanRefer#data-preparation) with one modification:
+<!-- 3. Pre-process the multiview features from ENet: Please refer to the instructions in [ScanRefer's repo](https://github.com/daveredrum/ScanRefer#data-preparation) with one modification:
    - comment out lines 51 to 56 in [batch_load_scannet_data.py](https://github.com/daveredrum/ScanRefer/blob/master/data/scannet/batch_load_scannet_data.py#L51-L56) since we follow D3Net's setting that doesn't do point downsampling here.
 
-   Then put the generated `enet_feats_maxpool.hdf5` (116GB) under `m3drefclip/dataset/scannetv2`
+   Then put the generated `enet_feats_maxpool.hdf5` (116GB) under `m3drefclip/dataset/scannetv2` -->
 
-### ScanRefer dataset
-1. Download the [ScanRefer dataset (train/val)](https://daveredrum.github.io/ScanRefer/). Also, download the [test set](http://kaldir.vc.in.tum.de/scanrefer_benchmark_data.zip). The raw dataset files should be organized as follows:
+### Human Augmenting the ScanNet v2 dataset
+1. Download the [Human Pose Data](https://drive.google.com/drive/folders/1cVHuwIzxPwFNQBF2nK6zNTyQZPhsGk4O?usp=sharing) and the [Human Models](https://drive.google.com/file/d/147uXqfSrqgCvuusCNUTk-fJflzgR-bDu/view?usp=sharing).
+2. Unzip the zip files and arrange the data in accordance to the following folder structure:
     ```shell
-    m3drefclip # project root
+    ges3vig # project root
     ├── dataset
-    │   ├── scanrefer
+    │   ├── humans
+    │   │   ├── man_tall_white
+    │   │   ├── man_medium_white
+    │   │   ├── woman_medium_white
+    │   │   ├── woman_tall_white
+    |   |   ...    
+    │   ├── scannetv2
+    │   │   ├── scans
+    │   │   ├── human_info_train
+    │   │   ├── human_info_test
+    ```
+3. Augment the information by running the following command in the project root"
+    ```shell
+    python dataset/scannetv2/preprocess_all_imputed_data_add_scans.py +split={split}
+    ```
+    This should populate the folders `{split}_imputed` with the relevant `.pth` files
+
+### Generating Human Position data using Imputer
+1. Install Imputer by running the following the project root:
+```shell
+    cd Imputer
+    pip install -e .
+    cd ..
+```
+This will compile utilities essential for Imputer to run on GPU.
+
+2. Edit the target folder location in `config/data/human.yaml` to set the `imputer_target_dir` field. This sets the target folder where the imputer will save the imputed human positions.
+
+3. Run imputer using the following command:
+```shell
+python3 dataset/scannetv2/imputer_full.py data=imputerefer
+```
+
+4. Run the following command block to populate `{split}_imputed` with the final processed dataset
+```shell
+python3 dataset/scannetv2/preprocess_all_imputed_data.py data=imputerefer
+```
+
+
+### ImputeRefer dataset
+1. Download the [ImputeRefer dataset (train/val)](https://daveredrum.github.io/ScanRefer/). Also, download the [test set](http://kaldir.vc.in.tum.de/scanrefer_benchmark_data.zip). The raw dataset files should be organized as follows:
+    ```shell
+    ges3vig # project root
+    ├── dataset
+    │   ├── imputerefer
     │   │   ├── metadata
-    │   │   │   ├── ScanRefer_filtered_train.json
-    │   │   │   ├── ScanRefer_filtered_val.json
-    │   │   │   ├── ScanRefer_filtered_test.json
+    │   │   │   ├── ImputeRefer_filtered_train.json
+    │   │   │   ├── ImputeRefer_filtered_test.json
     ```
 
 2. Pre-process the data, "unique/multiple" labels will be added to raw `.json` files for evaluation purpose:
     ```shell
-    python dataset/scanrefer/add_evaluation_labels.py data=scanrefer
+    python dataset/scanrefer/add_evaluation_labels.py data=imputerefer
     ```
 
-### Nr3D dataset
-1. Download the [Nr3D dataset (train/test)](https://referit3d.github.io/benchmarks.html). The raw dataset files should be organized as follows:
-    ```shell
-    m3drefclip # project root
-    ├── dataset
-    │   ├── nr3d
-    │   │   ├── metadata
-    │   │   │   ├── nr3d_train.csv
-    │   │   │   ├── nr3d_test.csv
-    ```
 
-2. Pre-process the data, "easy/hard/view-dep/view-indep" labels will be added to raw `.csv` files for evaluation purpose:
-    ```shell
-    python dataset/nr3d/add_evaluation_labels.py data=nr3d
-    ```
-
-### Multi3DRefer dataset
-1. Downloading the [Multi3DRefer dataset (train/val)](https://aspis.cmpt.sfu.ca/projects/multi3drefer/data/multi3drefer_train_val.zip). The raw dataset files should be organized as follows:
-    ```shell
-    m3drefclip # project root
-    ├── dataset
-    │   ├── multi3drefer
-    │   │   ├── metadata
-    │   │   │   ├── multi3drefer_train.json
-    │   │   │   ├── multi3drefer_val.json
-    ```
 
 ### Pre-trained detector
-We pre-trained [PointGroup](https://arxiv.org/abs/2004.01658) implemented in [MINSU3D](https://github.com/3dlg-hcvc/minsu3d/) on [ScanNet v2](http://www.scan-net.org/) and use it as the detector. We use coordinates + colors + multi-view features as inputs.
-1. Download the [pre-trained detector](https://aspis.cmpt.sfu.ca/projects/m3dref-clip/pretrain/PointGroup_ScanNet.ckpt). The detector checkpoint file should be organized as follows:
+We pre-trained [PointGroup](https://arxiv.org/abs/2004.01658) implemented in [MINSU3D](https://github.com/3dlg-hcvc/minsu3d/) on Imputed [ScanNet v2](http://www.scan-net.org/) scenes and use it as the detector. We use coordinates + colors + multi-view features as inputs.
+1. Download the [pre-trained detector](https://drive.google.com/file/d/1yqhUMg5d4dh60dLDv4mf_RF4HXBo2T-Y/view?usp=sharing). The detector checkpoint file should be organized as follows:
     ```shell
-    m3drefclip # project root
+    ges3vig # project root
     ├── checkpoints
     │   ├── PointGroup_ScanNet.ckpt
     ```
@@ -176,84 +189,36 @@ We pre-trained [PointGroup](https://arxiv.org/abs/2004.01658) implemented in [MI
 ## Training, Inference and Evaluation
 Note: Configuration files are managed by [Hydra](https://hydra.cc/), you can easily add or override any configuration attributes by passing them as arguments.
 ```shell
-# log in to WandB
-wandb login
-
-# train a model with the pre-trained detector, using predicted object proposals
-python train.py data={scanrefer/nr3d/multi3drefer} experiment_name={any_string} +detector_path=checkpoints/PointGroup_ScanNet.ckpt
-
-# train a model with the pretrained detector, using GT object proposals
-python train.py data={scanrefer/nr3d/multi3drefer} experiment_name={any_string} +detector_path=checkpoints/PointGroup_ScanNet.ckpt model.network.detector.use_gt_proposal=True
-
-# train a model from a checkpoint, it restores all hyperparameters in the .ckpt file
-python train.py data={scanrefer/nr3d/multi3drefer} experiment_name={checkpoint_experiment_name} ckpt_path={ckpt_file_path}
-
-# test a model from a checkpoint and save its predictions
-python test.py data={scanrefer/nr3d/multi3drefer} data.inference.split={train/val/test} ckpt_path={ckpt_file_path} pred_path={predictions_path}
-
-# evaluate predictions
-python evaluate.py data={scanrefer/nr3d/multi3drefer} pred_path={predictions_path} data.evaluation.split={train/val/test}
-
-# log in to WandB
 wandb login
 
 # train a model with the pre-trained detector, using predicted object proposals for imputed data
-python train_imputed.py data=imputedscanrefer experiment_name={any_string}
+python train.py data=imputerefer experiment_name={any_string}
+
+
+# train a model with the pre-trained detector, using predicted object proposals
+python train.py data=imputerefer experiment_name={any_string} +detector_path=checkpoints/PointGroup_ScanNet.ckpt
+
 
 # train a model from a checkpoint, it restores all hyperparameters in the .ckpt file for imputed data
-python train_imputed.py data=imputedscanrefer experiment_name={checkpoint_experiment_name} ckpt_path={ckpt_file_path} #is suggested
+python train.py data=imputedrefer experiment_name={checkpoint_experiment_name} ckpt_path={ckpt_file_path} #is suggested
 
 # test a model from a checkpoint and save its predictions for imputed data
-python test.py data={scanrefer/nr3d/multi3drefer} data.inference.split={train/val/test} ckpt_path={ckpt_file_path} pred_path={predictions_path} #currently unsupported
+python test.py data=imputerefer data.inference.split={train/val/test} ckpt_path={ckpt_file_path} pred_path={predictions_path}
 ```
 ## Checkpoints
-### ScanRefer dataset
-[M3DRef-CLIP_ScanRefer.ckpt](https://aspis.cmpt.sfu.ca/projects/m3dref-clip/pretrain/M3DRef-CLIP_ScanRefer.ckpt)
+### ImputeRefer dataset
+[Ges3ViG_ImputeRefer.ckpt](https://drive.google.com/file/d/1t4qfz3DBFjwTqHucoe4NS0igavckE-qC/view?usp=sharing)
 
 Performance:
 
-| Split | IoU  | Unique | Multiple | Overall | 
-|:------|:-----|:-------|:---------|:--------|
-| Val   | 0.25 | 85.3   | 43.8     | 51.9    |
-| Val   | 0.5  | 77.2   | 36.8     | 44.7    |
-| Test  | 0.25 | 79.8   | 46.9     | 54.3    |
-| Test  | 0.5  | 70.9   | 38.1     | 45.5    |
+| **Model**                             | **IoU @0.25 (unique)** | **IoU @0.5 (unique)** | **IoU @0.25 (multiple)** | **IoU @0.5 (multiple)** | **IoU @0.25 (overall)** | **IoU @0.5 (overall)** |
+|---------------------------------------|-------------------------|-------------------------|---------------------------|---------------------------|---------------------------|---------------------------|
+| **Without Gestures:**                 |                         |                         |                           |                           |                           |                           |
+| 3DVG-Transformer   | 71.56                  | 50.66                  | 31.35                    | 21.54                    | 39.17                    | 27.20                    |
+| HAM                | 67.10                  | 48.13                  | 25.42                    | 16.04                    | 33.51                    | 22.27                    |
+| 3DJCG               | 75.93                  | 59.19                  | 40.34                    | 30.61                    | 47.24                    | 36.16                    |
+| M3DRefCLIP               | 77.32                  | 60.15                  | 62.62                    | 47.27                    | 65.53                    | 49.78                    |
+| **With Gestures:**                    |                         |                         |                           |                           |                           |                           |
+| ScanERU              | 71.60                  | 52.79                  | 31.91                    | 23.06                    | 39.54                    | 28.84                    |
+| **Ges3ViG**                 | **84.60**              | **71.03**              | **67.57**                | **55.77**                | **70.85**                | **58.71**                |
 
-### Nr3D dataset
-[M3DRef-CLIP_Nr3d.ckpt](https://aspis.cmpt.sfu.ca/projects/m3dref-clip/pretrain/M3DRef-CLIP_Nr3D.ckpt)
-
-Performance:
-
-| Split | Easy | Hard | View-dep | View-indep | Overall |
-|:------|:-----|:-----|:---------|:-----------|:--------|
-| Test  | 55.6 | 43.4 | 42.3     | 52.9       | 49.4    |
-
-### Multi3DRefer dataset
-[M3DRef-CLIP_Multi3DRefer.ckpt](https://aspis.cmpt.sfu.ca/projects/m3dref-clip/pretrain/M3DRef-CLIP_Multi3DRefer.ckpt)
-
-Performance:
-
-| Split | IoU  | ZT w/ D | ZT w/o D | ST w/ D | ST w/o D | MT   | Overall |
-|:------|:-----|:--------|:---------|:--------|:---------|:-----|:--------|
-| Val   | 0.25 | 39.4   | 81.8     | 34.6    | 53.5     | 43.6 | 42.8    |
-| Val   | 0.5  | 39.4   | 81.8     | 30.6    | 47.8     | 37.9 | 38.4    |
-
-## Benchmark
-### ScanRefer
-Convert M3DRef-CLIP predictions to [ScanRefer benchmark format](https://kaldir.vc.in.tum.de/scanrefer_benchmark/documentation):
-```shell
-python dataset/scanrefer/convert_output_to_benchmark_format.py data=scanrefer pred_path={predictions_path} +output_path={output_file_path}
-```
-### Nr3D
-Please refer to [ReferIt3D benchmark](https://referit3d.github.io/benchmarks.html) to report results.
-
-##Configs
-Configs can be changed to change training methods and modules trained.
-To change training and checkpointing parameters, use configs/global\_{imputed}\_config.yaml
-To change model related (for e.g. only training human module/only training detector) and learning rate related parameters check config/model/m3dref\_clip.yaml
-
-## TODO
-- [ ] Add Additional human models pointing in different directions (vertically) to the collection.
-- [x] Add a human decoder module and train it.
-- [ ] Add a "Pointing Direction Loss".
-- [x] Add a human inferrer module to bias the selection of objects closest it pointing line.
