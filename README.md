@@ -91,7 +91,7 @@ Note: ImputeRefer dataset requires the [ScanNet v2](http://www.scan-net.org/) da
     Here train, test, val.zip contain preprocessed .pth files for original ScanNet-V2 dataset while train_imputed_newer, val_imputed_newer.zip contain modified .pth for imputed version of ScanNet-V2. 
     The file points.zip contains the bounding box-corner coordinates for every object per scene and some additional meta-data and file translated_transforms_v2.zip contains .pth files containing translation and rotation data for the singular human subject we have given by imputer. -->
 ### ScanNet v2 dataset
-1. Download the [ScanNet v2 dataset (train/val/test)](http://www.scan-net.org/), (refer to [ScanNet's instruction](dataset/scannetv2/README.md) for more details). The raw dataset files should be organized as follows:
+1. Download the [ScanNet v2 dataset (train/val/test)](http://www.scan-net.org/). The raw dataset files should be organized as follows:
     ```shell
     ges3vig # project root
     ├── dataset
