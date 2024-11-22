@@ -159,8 +159,8 @@ python3 dataset/scannetv2/preprocess_all_imputed_data.py data=imputerefer
 ```
 
 
-### ImputeRefer dataset
-1. Download the [ImputeRefer dataset (train/val)](https://daveredrum.github.io/ScanRefer/). Also, download the [test set](http://kaldir.vc.in.tum.de/scanrefer_benchmark_data.zip). The raw dataset files should be organized as follows:
+### ImputeRefer Ground Truth and Language Descriptions 
+1. Download the [ImputeRefer ground truth and language descriptions (train/test)](https://drive.google.com/drive/folders/1MtWnlox42HUcYzlBwe-mA-ceiijnVBy0?usp=sharing). The raw dataset files should be organized as follows:
     ```shell
     ges3vig # project root
     ├── dataset
