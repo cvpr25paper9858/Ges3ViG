@@ -222,3 +222,8 @@ Performance:
 | ScanERU              | 71.60                  | 52.79                  | 31.91                    | 23.06                    | 39.54                    | 28.84                    |
 | **Ges3ViG**                 | **84.60**              | **71.03**              | **67.57**                | **55.77**                | **70.85**                | **58.71**                |
 
+
+
+### Acknowledgements
+
+We would like to acknowledge [M3DRefCLIP](https://github.com/3dlg-hcvc/M3DRef-CLIP) for the 3D Visual Grounding Codebase.
