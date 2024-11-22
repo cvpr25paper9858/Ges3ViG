@@ -1,0 +1,26 @@
+# Managed by Hydra
+
+defaults:
+  - scannetv2
+  - human
+
+lang_dataset: MultiImputedScanRefer
+lang_dataset_path: ${data.data_root_path}/pointrefer
+
+lang_metadata:
+  metadata_root_path: ${data.lang_dataset_path}/metadata
+  train_language_data: ${data.lang_metadata.metadata_root_path}/PointRefer_filtered_train_final_k.json
+  val_language_data: ${data.lang_metadata.metadata_root_path}/PointRefer_filtered_val_final_k.json
+  test_language_data: ${data.lang_metadata.metadata_root_path}/ScanRefer_filtered_test.json
+
+chunk_size: 1
+
+evaluator:
+  _target_: m3drefclip.evaluation.scanrefer_evaluator.ScanReferEvaluator
+  verbose: True
+  metric_name: accuracy
+
+monitor_value: accuracy@0.5_overall
+
+human_perturbation_percentage: 5
+

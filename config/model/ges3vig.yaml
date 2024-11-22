@@ -1,0 +1,72 @@
+# Managed by Hydra
+
+model_name:
+  _target_: ges3vig.model.ges3vig.Ges3Vig
+
+network:
+  freeze_full_detector: False
+  freeze_human_decoder: False
+  max_num_proposals: 80
+  use_contrastive_loss: True
+  clip_model: ViT-B/32
+  use_2d_feature: True
+  use_3d_features: True
+  use_human_pointer_scores: True
+  human_pointer_scale: 1.0
+  use_human_early: True
+  use_human_early_num_feats: 30 
+  adaptive_human_weight: True
+  detector:
+    train_pg_num_epochs: 5
+    train_pg: False
+    train_human: True
+    output_channel: 32
+    use_gt_proposal: False
+    
+  object_renderer:
+    eye: [[0.86, 0.5, 1], [-0.86, 0.5, 1], [0, -1, 1]]
+    rasterizer_setting:
+      image_size: 224
+      radius: 0.025
+      points_per_pixel: 3
+      bin_size: 0
+
+  clip_word_encoder:
+    _target_: ges3vig.model.language_module.clip_word_encoder.CLIPWordEncoder
+    output_channel: 128
+    dropout: 0.1
+
+  clip_img_encoder:
+    output_channel: 128
+    dropout: 0.1
+
+  matching_module:
+    feat_channel: 128
+    head: 4
+    depth: 2
+
+optimizer:
+  _target_: torch.optim.AdamW
+  lr: 0.0005
+  weight_decay: 0.00001
+
+lr_decay:
+  start_epoch: 25
+
+loss:
+  reference_bce_loss:
+    _target_: ges3vig.loss.reference_loss.RefBCELoss
+    iou_threshold: 0.5
+    matching_strategy: hungarian
+
+  reference_ce_loss:
+    _target_: ges3vig.loss.reference_loss.RefCELoss
+    iou_threshold: 0
+
+  contrastive_loss:
+    _target_: ges3vig.loss.contrastive_loss.SinglePairContrastiveLoss
+    temperature: 2.6593
+    split_batch: False
+
+inference:
+  output_threshold: 0.1

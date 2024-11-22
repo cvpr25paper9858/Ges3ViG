@@ -1,0 +1,7 @@
+defaults:
+    - scannetv2
+human_dir: ${data.data_root_path}/humans
+points_dir: ${data.scene_dataset_path}/points
+
+imputer_target_dir: ${data.scene_dataset_path}/translated_transforms_v16_correct
+imputer_max_workers: 15
